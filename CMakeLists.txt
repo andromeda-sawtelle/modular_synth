@@ -4,6 +4,9 @@ project(sampler_test VERSION 0.1.0 LANGUAGES CXX C)
 
 find_library(PORTAUDIO portaudio)
 
-add_executable(sampler_test src/main.c)
+add_executable(sampler_test src/main.c
+                            src/main.h
+                            src/osc.c
+                            src/osc.h)
 
 target_link_libraries(sampler_test PRIVATE ${PORTAUDIO})
