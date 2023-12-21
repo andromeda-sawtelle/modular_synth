@@ -12,10 +12,8 @@ typedef struct osc_data {
 typedef struct osc {
   osc_data_t data;
   int (*oscCallback)(osc_data_t,
-                    unsigned long,
-                    const PaStreamCallbackTimeInfo*,
-                    PaStreamCallbackFlags,
-                    void*);
+                    unsigned int,
+                    float*);
 }osc_t;
 
 osc_t* createOsc();

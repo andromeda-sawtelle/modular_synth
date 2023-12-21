@@ -1,7 +1,7 @@
 #include "main.h"
 
-static module_t data[2];
-static size_t data_len = 1;
+static module_t *data;
+static int data_len = 2;
 
 static int mainCallback( const void *input,
                          void *output,
@@ -10,39 +10,65 @@ static int mainCallback( const void *input,
                          PaStreamCallbackFlags statusFlags,
                          void *userData ){
     module_t *data = (module_t *)userData;
+    float *out = (float*) output;
     (void *)input;
-
     for(int i = data_len-1; i >= 0; i--) {
-        switch(data->type){
+        module_t curr_module = data[i];
+        switch(curr_module.type){
             case OSC:
-                data->module.osc->oscCallback(data->module.osc->data,
-                                             frameCount,
-                                             timeInfo,
-                                             statusFlags,
-                                             output);
+                osc_t* osc = (osc_t*)(curr_module.module);
+                osc->oscCallback(osc->data,
+                                frameCount,
+                                out);
                 break;
-            case TEST:
-                printf("test");
+            case VCA:
+                vca_t* vca = (vca_t*)(curr_module.module);
+                vca->vcaCallback(vca->data,
+                                frameCount,
+                                out);
         }
+
+    }
+    return 0;
+}
+
+static int init_data(){
+    data = malloc(sizeof(module_t) * data_len);
+    if(data == NULL){
+        return 1;
+    }
+
+    data[1].type = OSC;
+    data[1].module = createOsc();
+    if(data[1].module == NULL){
+        return 1;
+    }
+
+    data[0].type = VCA;
+    data[0].module = createVca(0.01);
+    if(data[0].module == NULL){
+        return 1;
     }
 
     return 0;
 }
 
-static int init_data(){
-    int res = 0;
-    data[0].type = OSC;
-    data[0].module.osc = createOsc();
-    if(data[0].module.osc == NULL){
-        res = 1;
-    }
-    return res;
-}
+static void delete_data(){
+    for(int i = 0; i < data_len; i++){
+        module_t module = data[i];
+        switch (module.type) {
+        case OSC:
+            osc_t *osc = (osc_t*)(module.module);
+            deleteOsc(osc);
+            break;
+        case VCA:
+            vca_t *vca = (vca_t*)(module.module);
+            deleteVca(vca);
+            break;
+        }
 
-static int delete_data(){
-    int res = 0;
-    deleteOsc(data[0].module.osc);
-    return res;
+    }
+    free(data);
 }
 
 int main(int argc, char const *argv[])
@@ -63,7 +89,7 @@ int main(int argc, char const *argv[])
                                 2,          /* stereo output */
                                 paFloat32,  /* 32 bit floating point output */
                                 SAMPLE_RATE,
-                                256,        /* frames per buffer, i.e. the number
+                                paFramesPerBufferUnspecified,        /* frames per buffer, i.e. the number
                                                    of sample frames that PortAudio will
                                                    request from the callback. Many apps
                                                    may want to use
@@ -71,7 +97,7 @@ int main(int argc, char const *argv[])
                                                    tells PortAudio to pick the best,
                                                    possibly changing, buffer size.*/
                                 mainCallback, /* this is your callback */
-                                &data ); /*This is a pointer that will be passed to
+                                data); /*This is a pointer that will be passed to
                                                    your callback*/
     if( err != paNoError ) goto error;
 
