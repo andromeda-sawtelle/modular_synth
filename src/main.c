@@ -1,5 +1,7 @@
 #include "main.h"
 
+#include <stdbool.h>
+
 static module_t *data;
 static int data_len = 2;
 
@@ -16,13 +18,13 @@ static int mainCallback( const void *input,
         module_t curr_module = data[i];
         switch(curr_module.type){
             case OSC:
-                osc_t* osc = (osc_t*)(curr_module.module);
+                osc_t *osc = (curr_module.module);
                 osc->oscCallback(osc->data,
                                 frameCount,
                                 out);
                 break;
             case VCA:
-                vca_t* vca = (vca_t*)(curr_module.module);
+                vca_t *vca = (curr_module.module);
                 vca->vcaCallback(vca->data,
                                 frameCount,
                                 out);
@@ -71,6 +73,47 @@ static void delete_data(){
     free(data);
 }
 
+char* get_device_name(module_t *module){
+    switch (module->type) {
+    case OSC:
+        return "Oscillator";
+        break;
+    case VCA:
+        return "VCA";
+        break;
+    default:
+        return NULL;
+    }
+}
+
+int print_devices(){
+    for(int i = 0; i < data_len; i++){
+        printf("%d: %s\n", i, get_device_name(&data[i]));
+    }
+    return 0;
+}
+
+int loop(){
+    bool running = true;
+    while(running){
+        char line[256];
+        if (fgets(line, sizeof(line), stdin)) {
+            switch (line[0]) {
+            case 'q':
+                running = false;
+                break;
+            case 'l':
+                print_devices();
+                break;
+            default:
+                printf("command %c is not valid", line[0]);
+            }
+
+        }
+    }
+    return 0;
+}
+
 int main(int argc, char const *argv[])
 {
 	PaError err;
@@ -79,6 +122,8 @@ int main(int argc, char const *argv[])
     if(init_data()){
         return 1;
     }
+
+    loop();
 
 	err = Pa_Initialize();
     if( err != paNoError ) goto error;
