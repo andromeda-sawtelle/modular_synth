@@ -1,7 +1,5 @@
 #include "main.h"
 
-#include <stdbool.h>
-
 static module_t *data;
 static int data_len = 2;
 
@@ -93,6 +91,18 @@ int print_devices(){
     return 0;
 }
 
+int edit_device(module_t *module, const int param, const float value){
+    switch (module->type) {
+    case VCA:
+        return edit_vca_params((vca_t*)module->module, param, value);
+        break;
+    case OSC:
+        break;
+    }
+
+    return 1;
+}
+
 int loop(){
     bool running = true;
     while(running){
@@ -105,10 +115,41 @@ int loop(){
             case 'l':
                 print_devices();
                 break;
+            case 'e':
+                int i = 1;
+                module_t *module;
+                int param;
+                float value;
+                char *p = strtok(line, " ");
+                for (p = strtok(NULL, " "); p != NULL; p = strtok(NULL, " ")){
+                    char *end;
+                    switch (i) {
+                    case 1:
+                        //determine module
+                        int index = strtol(p, &end, 10);
+                        if((index < 0) && (index >= data_len)){
+                            fprintf(stderr, "%d is out of range for existing modules\n", index);
+                            return 1;
+                        }
+                        module = &data[index];
+                        break;
+                    case 2:
+                        //get the param num
+                        param = strtol(p, &end, 10);
+                        break;
+                    case 3:
+                        //get the value
+                        value = strtof(p, &end);
+                        break;
+                    }
+                    i++;
+
+                }
+                edit_device(module, param, value);
+                break;
             default:
                 printf("command %c is not valid", line[0]);
             }
-
         }
     }
     return 0;
@@ -122,8 +163,6 @@ int main(int argc, char const *argv[])
     if(init_data()){
         return 1;
     }
-
-    loop();
 
 	err = Pa_Initialize();
     if( err != paNoError ) goto error;
@@ -149,7 +188,7 @@ int main(int argc, char const *argv[])
 	err = Pa_StartStream( stream );
 	if( err != paNoError ) goto error;
 
-	Pa_Sleep(NUM_SECONDS*1000);
+    loop();
 
 	err = Pa_StopStream( stream );
 	if( err != paNoError ) goto error;

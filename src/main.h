@@ -3,6 +3,9 @@
 
 #include <stdio.h>
 #include <portaudio.h>
+#include <stdbool.h>
+#include <string.h>
+
 #include "osc.h"
 #include "vca.h"
 

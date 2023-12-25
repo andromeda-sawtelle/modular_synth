@@ -1,5 +1,6 @@
 #include "vca.h"
 
+#include <stdio.h>
 
 int vcaProcess(vca_data_t data,
                unsigned int frameCount,
@@ -25,4 +26,22 @@ vca_t* createVca(float gain){
 
 void deleteVca(vca_t* vca) {
   free(vca);
+}
+
+int edit_gain(vca_t *vca, float value){
+  vca->data.gain = value;
+  return 0;
+}
+
+int edit_vca_params(vca_t *vca, int param, float value){
+  switch (param) {
+  case GAIN:
+    edit_gain(vca, value);
+    break;
+  default:
+    fprintf(stderr, "%d is not a valid parameter for a VCA\n", param);
+    return 1;
+  }
+
+  return 0;
 }
