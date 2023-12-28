@@ -1,7 +1,9 @@
 #include "main.h"
 
-static module_t *data;
-static int data_len = 2;
+// Need to change to easily remove modules
+// Either a wrapper for the array, or linked list
+static module_t data[50];
+static int n_data = 1;
 
 static int mainCallback( const void *input,
                          void *output,
@@ -12,9 +14,11 @@ static int mainCallback( const void *input,
     module_t *data = (module_t *)userData;
     float *out = (float*) output;
     (void *)input;
-    for(int i = data_len-1; i >= 0; i--) {
+    for(int i = n_data-1; i >= 0; i--) {
         module_t curr_module = data[i];
         switch(curr_module.type){
+            case AUDIO_OUT:
+                break;
             case OSC:
                 osc_t *osc = (curr_module.module);
                 osc->oscCallback(osc->data,
@@ -33,11 +37,6 @@ static int mainCallback( const void *input,
 }
 
 static int init_data(){
-    data = malloc(sizeof(module_t) * data_len);
-    if(data == NULL){
-        return 1;
-    }
-
     data[1].type = OSC;
     data[1].module = createOsc();
     if(data[1].module == NULL){
@@ -54,9 +53,11 @@ static int init_data(){
 }
 
 static void delete_data(){
-    for(int i = 0; i < data_len; i++){
+    for(int i = 0; i < n_data; i++){
         module_t module = data[i];
         switch (module.type) {
+        case AUDIO_OUT:
+            break;
         case OSC:
             osc_t *osc = (osc_t*)(module.module);
             deleteOsc(osc);
@@ -68,24 +69,23 @@ static void delete_data(){
         }
 
     }
-    free(data);
 }
 
 char* get_device_name(module_t *module){
     switch (module->type) {
+    case AUDIO_OUT:
+        return "Audio Out";
     case OSC:
         return "Oscillator";
-        break;
     case VCA:
         return "VCA";
-        break;
     default:
         return NULL;
     }
 }
 
 int print_devices(){
-    for(int i = 0; i < data_len; i++){
+    for(int i = 0; i < n_data; i++){
         printf("%d: %s\n", i, get_device_name(&data[i]));
     }
     return 0;
@@ -98,6 +98,8 @@ int edit_device(module_t *module, const int param, const float value){
         break;
     case OSC:
         break;
+    default:
+        printf("Unknown device\n");
     }
 
     return 1;
@@ -109,6 +111,8 @@ int loop(){
         char line[256];
         if (fgets(line, sizeof(line), stdin)) {
             switch (line[0]) {
+                int i;
+                char *p;
             case 'q':
                 running = false;
                 break;
@@ -116,18 +120,18 @@ int loop(){
                 print_devices();
                 break;
             case 'e':
-                int i = 1;
+                i = 1;
                 module_t *module;
                 int param;
                 float value;
-                char *p = strtok(line, " ");
+                p = strtok(line, " ");
                 for (p = strtok(NULL, " "); p != NULL; p = strtok(NULL, " ")){
                     char *end;
                     switch (i) {
                     case 1:
                         //determine module
                         int index = strtol(p, &end, 10);
-                        if((index < 0) && (index >= data_len)){
+                        if((index < 0) && (index >= n_data)){
                             fprintf(stderr, "%d is out of range for existing modules\n", index);
                             return 1;
                         }
@@ -147,8 +151,30 @@ int loop(){
                 }
                 edit_device(module, param, value);
                 break;
+            case 'c':
+                p = strtok(line, " ");
+                p = strtok(NULL, " \n");
+
+                printf("%s\n", p);
+
+                if(strcmp(p, "osc") == 0){
+                    printf("WTF\n");
+                    data[n_data].type = OSC;
+                    data[n_data].module = createOsc();
+                    n_data++;
+                }
+                else if(strcmp(p, "vca") == 0){
+                    data[n_data].type = VCA;
+                    data[n_data].module = createVca(1);
+                    n_data++;
+                }
+                else{
+                    printf("%s -> unrecognized module\n", p);
+                }
+
+                break;
             default:
-                printf("command %c is not valid", line[0]);
+                printf("command %c is not valid\n", line[0]);
             }
         }
     }
@@ -160,9 +186,7 @@ int main(int argc, char const *argv[])
 	PaError err;
     PaStream *stream;
 
-    if(init_data()){
-        return 1;
-    }
+    data[0].type = AUDIO_OUT;
 
 	err = Pa_Initialize();
     if( err != paNoError ) goto error;
@@ -201,8 +225,6 @@ error:
 	if( err != paNoError ) {
 		printf(  "PortAudio error: %s\n", Pa_GetErrorText( err ) );
 	}
-
-    delete_data();
 
 	return 0;
 }

@@ -13,6 +13,7 @@
 #define NUM_SECONDS 2
 
 enum modType {
+    AUDIO_OUT,
     OSC,
     VCA
 };
