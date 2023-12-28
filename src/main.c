@@ -1,7 +1,8 @@
 #include "main.h"
 
 // Need to change to easily remove modules
-// Either a wrapper for the array, or linked list
+// When deleteing, replace module at index with the module at the
+// end of the array, then decrement n_data
 static module_t data[50];
 static int n_data = 1;
 
@@ -36,22 +37,6 @@ static int mainCallback( const void *input,
     return 0;
 }
 
-static int init_data(){
-    data[1].type = OSC;
-    data[1].module = createOsc();
-    if(data[1].module == NULL){
-        return 1;
-    }
-
-    data[0].type = VCA;
-    data[0].module = createVca(0.01);
-    if(data[0].module == NULL){
-        return 1;
-    }
-
-    return 0;
-}
-
 static void delete_data(){
     for(int i = 0; i < n_data; i++){
         module_t module = data[i];
@@ -69,6 +54,22 @@ static void delete_data(){
         }
 
     }
+}
+
+void create_module(enum modType type){
+    switch(type){
+    case AUDIO_OUT:
+        printf("Cannot create a new Audio Out\n");
+        break;
+    case OSC:
+        break;
+    case VCA:
+        break;
+    }
+}
+
+void delete_module(int index){
+    printf("Delete module at %d\n", index);
 }
 
 char* get_device_name(module_t *module){
@@ -225,6 +226,8 @@ error:
 	if( err != paNoError ) {
 		printf(  "PortAudio error: %s\n", Pa_GetErrorText( err ) );
 	}
+
+    delete_data();
 
 	return 0;
 }
