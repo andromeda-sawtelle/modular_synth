@@ -1,3 +1,6 @@
+#ifndef MODULE_H
+#define MODULE_H
+
 #include <iostream>
 
 namespace modules{
@@ -10,9 +13,10 @@ namespace modules{
     class module {
         types type;
     public:
-        virtual module* create_module(int type);
+        module(types type){
+            this->type = type;
+        }
         virtual int edit_parameter(int option, float value);
-        virtual int delete_module(module* module);
         virtual int processFrame(float* frame, unsigned int frameCount);
 
         friend std::ostream& operator << (std::ostream &os, const module &m) {
@@ -20,3 +24,5 @@ namespace modules{
         }
     };
 }
+
+#endif //MODULE_H
