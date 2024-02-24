@@ -10,7 +10,7 @@ int oscProcess(osc_data_t data,
         *out++ = data.right_phase;  /* right */
         /* Generate simple sawtooth phaser that ranges between -1.0 and 1.0. */
         data.left_phase += 0.01f;
-        /* When signal reaches top, drop back down. */
+ /* When signal reaches top, drop back down. */
         if( data.left_phase >= 1.0f ) data.left_phase -= 2.0f;
         //data.left_phase *= 0.5;
         /* higher pitch so we can distinguish left and right. */
