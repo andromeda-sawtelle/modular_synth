@@ -1,7 +1,8 @@
 #include <iostream>
 #include <string>
 
-#include "modules.hpp"
+// #include "audio.hpp"
+#include "osc.hpp"
 
 using namespace std;
 using namespace modules;
@@ -19,4 +20,8 @@ public:
 
 int main(int argc, char** argv) {
     rack rack;
+
+    osc oscillator = osc();
+
+    // delete oscillator;
 }
