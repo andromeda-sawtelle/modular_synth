@@ -20,17 +20,19 @@ static int mainCallback( const void *input,
         switch(curr_module.type){
             case AUDIO_OUT:
                 break;
-            case OSC:
-                osc_t *osc = (curr_module.module);
+            case OSC:{
+                osc_t* osc = (curr_module.module);
                 osc->oscCallback(osc->data,
                                 frameCount,
                                 out);
                 break;
-            case VCA:
+            }
+            case VCA:{
                 vca_t *vca = (curr_module.module);
                 vca->vcaCallback(vca->data,
                                 frameCount,
                                 out);
+            }
         }
 
     }
@@ -41,16 +43,18 @@ static void delete_data(){
     for(int i = 0; i < n_data; i++){
         module_t module = data[i];
         switch (module.type) {
-        case AUDIO_OUT:
-            break;
-        case OSC:
-            osc_t *osc = (osc_t*)(module.module);
-            deleteOsc(osc);
-            break;
-        case VCA:
-            vca_t *vca = (vca_t*)(module.module);
-            deleteVca(vca);
-            break;
+            case AUDIO_OUT:
+                break;
+            case OSC:{
+                osc_t *osc = (osc_t*)(module.module);
+                deleteOsc(osc);
+                break;
+            }
+            case VCA:{
+                vca_t *vca = (vca_t*)(module.module);
+                deleteVca(vca);
+                break;
+            }
         }
 
     }
@@ -129,7 +133,7 @@ int loop(){
                 for (p = strtok(NULL, " "); p != NULL; p = strtok(NULL, " ")){
                     char *end;
                     switch (i) {
-                    case 1:
+                    case 1:{
                         //determine module
                         int index = strtol(p, &end, 10);
                         if((index < 0) && (index >= n_data)){
@@ -138,6 +142,7 @@ int loop(){
                         }
                         module = &data[index];
                         break;
+                    }
                     case 2:
                         //get the param num
                         param = strtol(p, &end, 10);
