@@ -1,27 +1,21 @@
 #include <iostream>
 #include <string>
+#include <memory>
 
-// #include "audio.hpp"
+#include "audio.hpp"
 #include "osc.hpp"
 
 using namespace std;
 using namespace modules;
 
-class rack {
-    module* modules;
-    char length = 0;
-
-public:
-    rack() {
-    }
-    ~rack(){
-    }
-};
+int loop() {
+    return 0;
+}
 
 int main(int argc, char** argv) {
-    rack rack;
-
-    osc oscillator = osc();
-
-    // delete oscillator;
+    auto data = std::make_unique<data_t>(10);
+    start_audio(data);
+    loop();
+    stop_audio();
+    return 0;
 }

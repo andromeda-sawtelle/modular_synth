@@ -4,8 +4,21 @@
 
 #define SAMPLE_RATE 48000
 
+using namespace modules;
+
+audio_out::audio_out() : module(AUDIO) {
+    this->num = 0;
+}
+
 static PaError err;
 static PaStream* stream;
+
+static int processModules(modules::module* m){
+    if(m == nullptr){
+        return 0;
+    }
+    return processModules(m->input);
+}
 
 static int mainCallback( const void *input,
                          void *output,
@@ -15,20 +28,11 @@ static int mainCallback( const void *input,
                          void *userData ){
     data_t* data = (data_t*) userData;
     float* out = (float*) output;
-    for(int i = data->length; i >= 0; i--) {
-
-    }
+    processModules(data->modules[0]);
     return 0;
 }
 
-static int processModules(modules::module* m){
-    if(m == nullptr){
-        return 0;
-    }
-    return processModules(m->input);
-}
-
-int start_stream(modules::module* data){
+int start_stream(data_t* data){
     err = Pa_Initialize();
     if( err != paNoError ) goto start_error;
 

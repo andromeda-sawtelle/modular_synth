@@ -6,13 +6,11 @@
 #include "modules.hpp"
 
 namespace modules{
-    class audio_out : public module {
+    class audio_out : virtual public module {
         int num;
     public:
-        audio_out(types type)
-        : module(type){
-            num = 0;
-        }
+        audio_out();
+
         int edit_parameters(int option, float value){
             return 0;
         }
@@ -32,7 +30,7 @@ public:
 
     data_t(int cap){
         modules = new modules::module*[cap];
-        modules[0] = new modules::audio_out(AUDIO);
+        modules[0] = new modules::audio_out();
         length = 1;
         capacity = cap;
     }

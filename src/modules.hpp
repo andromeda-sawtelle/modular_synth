@@ -3,38 +3,30 @@
 
 #include <iostream>
 
-enum types {
-    NA,
-    AUDIO,
-    OSC,
-    VCA,
-    LPF
-};
+namespace modules{
+    enum Type {
+        NA,
+        AUDIO,
+        OSC,
+        VCA,
+        LPF
+    };
 
-class module {
-    types type;
-public:
-    module* input = nullptr;
-    module* output = nullptr;
+    class module {
+    public:
+        module();
+        module(modules::Type type);
 
-    module() {
-        type = NA;
-    }
-    module(types mod_type){
-        type = mod_type;
-    }
+        virtual int processFrame(float* frame, unsigned int frameCount) = 0;
 
-    virtual int processFrame(float* frame, unsigned int frameCount);
+        modules::Type type;
 
-    friend std::ostream& operator << (std::ostream &os, const module &m) {
-        return (os << "Message: " << std::endl);
-    }
-};
+        module* input = nullptr;
+        module* output = nullptr;
 
-template <typename E>
-constexpr auto to_underlying(E e) noexcept {
-    return static_cast<std::underlying_type_t<E>>(e);
+
+        friend std::ostream& operator << (std::ostream &os, const module &m);
+    };
+
 }
-
-
 #endif //MODULE_H

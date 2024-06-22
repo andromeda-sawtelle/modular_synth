@@ -1,16 +1,16 @@
 #include "osc.hpp"
 
+using namespace modules;
+
 osc::osc() : module(OSC){
     parameters.freq = 440;
-    parameter.wave = SIN;
+    parameters.wave = SIN;
 }
 
-osc_parameters get
-
-
-int edit_parameter(int option, float value) {
+int osc::edit_parameter(int option, float value) {
     switch(option){
         case WAVE:
+            parameters.wave = static_cast<wave_t>(int(value));
             break;
         case FREQ:
             parameters.freq = value;
@@ -18,7 +18,7 @@ int edit_parameter(int option, float value) {
     return 0;
 }
 
-int processFrame(float* frame, unsigned int frameCount) {
+int osc::processFrame(float* frame, unsigned int frameCount) {
     for(uint i = 0; i < frameCount; i++){
         *frame++ = data.left_phase;  /* left */
         *frame++ = data.right_phase;  /* right */
