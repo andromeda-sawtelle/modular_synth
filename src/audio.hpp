@@ -42,7 +42,7 @@ public:
     }
 };
 
-int start_audio(modules::module* data);
+int start_audio(data_t* data);
 
 int stop_audio();
 
