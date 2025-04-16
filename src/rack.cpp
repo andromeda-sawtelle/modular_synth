@@ -33,6 +33,9 @@ static int mainCallback( const void *input,
 }
 
 int loop() {
+    while(true){
+
+    }
     return 0;
 }
 

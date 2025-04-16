@@ -42,8 +42,4 @@ public:
     }
 };
 
-int start_audio(data_t* data);
-
-int stop_audio();
-
 #endif //AUDIO_H
