@@ -18,9 +18,13 @@ enum modType {
     VCA
 };
 
-typedef struct module {
+typedef struct module module_t;
+
+struct module {
     enum modType type;
     void *module;
-}module_t;
+    module_t *input;
+    module_t *output;
+};
 
 #endif // MAIN_H_

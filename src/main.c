@@ -158,26 +158,62 @@ int loop(){
                 edit_device(module, param, value);
                 break;
             case 'c':
-                p = strtok(line, " ");
-                p = strtok(NULL, " \n");
+                switch(line[1]){
+                case 'r':
+                    p = strtok(line, " ");
+                    p = strtok(NULL, " \n");
 
-                printf("%s\n", p);
+                    printf("%s\n", p);
 
-                if(strcmp(p, "osc") == 0){
-                    printf("WTF\n");
-                    data[n_data].type = OSC;
-                    data[n_data].module = createOsc();
-                    n_data++;
-                }
-                else if(strcmp(p, "vca") == 0){
-                    data[n_data].type = VCA;
-                    data[n_data].module = createVca(1);
-                    n_data++;
-                }
-                else{
-                    printf("%s -> unrecognized module\n", p);
-                }
+                    if(strcmp(p, "osc") == 0){
+                        printf("WTF\n");
+                        data[n_data].type = OSC;
+                        data[n_data].module = createOsc();
+                        n_data++;
+                    }
+                    else if(strcmp(p, "vca") == 0){
+                        data[n_data].type = VCA;
+                        data[n_data].module = createVca(1);
+                        n_data++;
+                    }
+                    else{
+                        printf("%s -> unrecognized module\n", p);
+                    }
 
+                    break;
+                case 'n': 
+                    i = 1;
+                    module_t *module1;
+                    module_t *module2;
+                    p = strtok(line, " ");
+                    for (p = strtok(NULL, " "); p != NULL; p = strtok(NULL, " ")){
+                        char *end;
+                        switch (i) {
+                        case 1:{
+                            //determine module
+                            int index = strtol(p, &end, 10);
+                            if((index < 0) && (index >= n_data)){
+                                fprintf(stderr, "%d is out of range for existing modules\n", index);
+                                return 1;
+                            }
+                            module1 = &data[index];
+                            break;
+                        }
+                        case 2:
+                            //determine module 2
+                            int index = strtol(p, &end, 10);
+                            if((index < 0) && (index >= n_data)){
+                                fprintf(stderr, "%d is out of range for existing modules\n", index);
+                                return 1;
+                            }
+                            module2 = &data[index];
+                            break;
+                        i++;
+                        }
+                    }
+                default:
+                    printf("command %s is not available\n", line);
+                }
                 break;
             default:
                 printf("command %c is not valid\n", line[0]);
@@ -189,12 +225,12 @@ int loop(){
 
 int main(int argc, char const *argv[])
 {
-	PaError err;
+    PaError err;
     PaStream *stream;
 
     data[0].type = AUDIO_OUT;
 
-	err = Pa_Initialize();
+    err = Pa_Initialize();
     if( err != paNoError ) goto error;
 
     /* Open an audio I/O stream. */
@@ -215,24 +251,24 @@ int main(int argc, char const *argv[])
                                                    your callback*/
     if( err != paNoError ) goto error;
 
-	err = Pa_StartStream( stream );
-	if( err != paNoError ) goto error;
+    err = Pa_StartStream( stream );
+    if( err != paNoError ) goto error;
 
     loop();
 
-	err = Pa_StopStream( stream );
-	if( err != paNoError ) goto error;
+    err = Pa_StopStream( stream );
+    if( err != paNoError ) goto error;
 
-	err = Pa_CloseStream( stream );
-	if( err != paNoError ) goto error;
+    err = Pa_CloseStream( stream );
+    if( err != paNoError ) goto error;
 
 error:
-	err = Pa_Terminate();
-	if( err != paNoError ) {
-		printf(  "PortAudio error: %s\n", Pa_GetErrorText( err ) );
-	}
+    err = Pa_Terminate();
+    if( err != paNoError ) {
+        printf(  "PortAudio error: %s\n", Pa_GetErrorText( err ) );
+    }
 
     delete_data();
 
-	return 0;
+    return 0;
 }
