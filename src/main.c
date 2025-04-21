@@ -225,27 +225,35 @@ int loop(){
 
 int main(int argc, char const *argv[])
 {
+    PaStreamParameters outputParameters;
     PaError err;
     PaStream *stream;
 
     data[0].type = AUDIO_OUT;
+    data[n_data].type = OSC;
+    data[n_data].module = createOsc();
+    n_data++;
 
     err = Pa_Initialize();
     if( err != paNoError ) goto error;
 
+    outputParameters.device = Pa_GetDefaultOutputDevice(); /* default output device */
+    if (outputParameters.device == paNoDevice) {
+        fprintf(stderr,"Error: No default output device.\n");
+        goto error;
+    }
+    outputParameters.channelCount = 2;       /* stereo output */
+    outputParameters.sampleFormat = paFloat32; /* 32 bit floating point output */
+    outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
+    outputParameters.hostApiSpecificStreamInfo = NULL;
+
     /* Open an audio I/O stream. */
-    err = Pa_OpenDefaultStream( &stream,
-                                0,          /* no input channels */
-                                2,          /* stereo output */
-                                paFloat32,  /* 32 bit floating point output */
+    err = Pa_OpenStream( &stream,
+                                NULL,
+                                &outputParameters,
                                 SAMPLE_RATE,
-                                paFramesPerBufferUnspecified,        /* frames per buffer, i.e. the number
-                                                   of sample frames that PortAudio will
-                                                   request from the callback. Many apps
-                                                   may want to use
-                                                   paFramesPerBufferUnspecified, which
-                                                   tells PortAudio to pick the best,
-                                                   possibly changing, buffer size.*/
+                                FRAMES_PER_BUFFER,
+                                paClipOff,
                                 mainCallback, /* this is your callback */
                                 data); /*This is a pointer that will be passed to
                                                    your callback*/
@@ -254,7 +262,8 @@ int main(int argc, char const *argv[])
     err = Pa_StartStream( stream );
     if( err != paNoError ) goto error;
 
-    loop();
+    //loop();
+    Pa_Sleep(NUM_SECONDS);
 
     err = Pa_StopStream( stream );
     if( err != paNoError ) goto error;

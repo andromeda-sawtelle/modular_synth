@@ -10,6 +10,7 @@
 #include "vca.h"
 
 #define SAMPLE_RATE (44100)
+#define FRAMES_PER_BUFFER  (64)
 #define NUM_SECONDS 2
 
 enum modType {
