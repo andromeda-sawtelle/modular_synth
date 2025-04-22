@@ -4,6 +4,7 @@
 #include <portaudio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdio.h>
 
 #define TABLE_SIZE (200)
 #ifndef M_PI

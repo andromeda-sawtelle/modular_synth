@@ -36,7 +36,7 @@ static int mainCallback( const void *input,
         }
 
     }
-    return 0;
+    return paContinue;
 }
 
 static void delete_data(){
@@ -163,10 +163,7 @@ int loop(){
                     p = strtok(line, " ");
                     p = strtok(NULL, " \n");
 
-                    printf("%s\n", p);
-
                     if(strcmp(p, "osc") == 0){
-                        printf("WTF\n");
                         data[n_data].type = OSC;
                         data[n_data].module = createOsc();
                         n_data++;
@@ -230,9 +227,6 @@ int main(int argc, char const *argv[])
     PaStream *stream;
 
     data[0].type = AUDIO_OUT;
-    data[n_data].type = OSC;
-    data[n_data].module = createOsc();
-    n_data++;
 
     err = Pa_Initialize();
     if( err != paNoError ) goto error;
@@ -262,8 +256,8 @@ int main(int argc, char const *argv[])
     err = Pa_StartStream( stream );
     if( err != paNoError ) goto error;
 
-    //loop();
-    Pa_Sleep(NUM_SECONDS);
+    loop();
+    //Pa_Sleep(NUM_SECONDS * 1000);
 
     err = Pa_StopStream( stream );
     if( err != paNoError ) goto error;
